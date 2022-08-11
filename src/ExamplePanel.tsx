@@ -173,7 +173,13 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
     });
   }
 
+
   let paramTypeList: string[] = ["boolean", "integer", "double", "string", "byte_array", "boolean_array", "integer_array", "double_array", "string_array"];
+  /**
+   * return the parameter type of the given parameter value
+   * @param paramVal The given Parameter Value
+   * @returns paramVal's parameter type
+   */
   const getType = (paramVal: ParameterValue) => {
     if (paramVal === undefined)
       return "undefined";
@@ -185,7 +191,7 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
    * @param val The new value to be set
    * @param name The name of the parameter that will be set to 'val'
    */
-  const updateSrvParamList = (val: string, name: string) => {
+  const updateSrvParamList = (name: string, val: string) => {
     let idx: number = paramNameList?.indexOf(name)!;
     let tempList: SetSrvParam[] = srvParamList!;
     let tempValList: string[] = [];
@@ -318,7 +324,7 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
       return(
         <select
         style={dropDownStyle}
-        onChange={(event) => { updateSrvParamList(event.target.value, param.name) }}
+        onChange={(event) => { updateSrvParamList(param.name, event.target.value) }}
         >
           <option selected hidden></option>
           <option>true</option>
@@ -327,30 +333,35 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
       );
     }
     return(
-      <input style={inputStyle} placeholder={getParameterValue(param.value)} onChange={(event) => { updateSrvParamList(event.target.value, param.name) }}/> 
+      <input style={inputStyle} placeholder={getParameterValue(param.value)} onChange={(event) => { updateSrvParamList(param.name, event.target.value) }}/> 
     );
   }
 
   const loadFile = (files: FileList | null) => { 
     if(files !== null) {
       files[0]?.text()
-      .then((value: string) => {
-        console.log(value);        
+      .then((value: string) => {      
         value = value.replaceAll(/[^\S\r\n]/gi, "");
         value = value.replace(node + ":\n", "");
         value = value.replace("ros__parameters:\n", "");
 
         let params: string[] = value.split("\n");
-        params.forEach(str => {
-
-          if(str.charAt(0) != '-' && str.charAt(str.length - 1) != ':') {
-            let temp: string[]= str.split(":");
-            updateSrvParamList(temp[1]!, temp[0]!);
+        for(let i = 0; i < params.length; i++) {
+          if(params[i]!.charAt(0) != '-' && params[i]!.charAt(params[i]!.length - 1) != ':') {
+            let temp: string[]= params[i]!.split(":");
+            updateSrvParamList(temp[0]!, temp[1]!);
+          } else if(params[i]!.charAt(params[i]!.length - 1) == ':') {
+            let tempName: string = params[i]!.replace(":", "").trim();
+            let tempVal: string = "";
+            while(i + 1 < params.length && params[++i]!.charAt(0) == '-') {
+              tempVal = tempVal.concat(params[i]!.replace("-", "").trim() + ",");
+            }
+            i--;
+            tempVal = tempVal.substring(0, tempVal.length-1);
+            updateSrvParamList(tempName, tempVal);
           }
-
-        });
+        }
         setParam();
-        console.log(value);
       })
       .catch((error: Error) => {
         console.log(error)
@@ -595,7 +606,7 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
               <div style={{margin: "0px 4px 0px 4px"}}>{getParameterValue(result.value)}</div>
               <div style={{margin: "0px 4px 0px 4px"}}> 
                 {createInputBox(result)}
-                {/* <input style={inputStyle} placeholder={getParameterValue(result.value)} onChange={(event) => { updateSrvParamList(event.target.value, result.name) }} /> */}
+                {/* <input style={inputStyle} placeholder={getParameterValue(result.value)} onChange={(event) => { updateSrvParamList(param.name, event.target.value) }} /> */}
                 </div>  
             </>
           ))}
