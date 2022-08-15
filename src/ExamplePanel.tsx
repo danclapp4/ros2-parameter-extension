@@ -8,6 +8,8 @@ let node: string = "init";
 let paramNameList: string[];
 let paramValList: ParameterValue[];
 
+// DEVELOMPENT BRANCH //
+
 function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Element {
 
 
@@ -110,7 +112,7 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
    * Retrieves a list of all parameters for the current node and their values
    */
   const updateData = () =>{
-    setStatus("retrieving parameters...")
+    // setStatus("retrieving parameters...")
     context.callService?.(node + "/list_parameters", {})
     .then((_value: unknown) => {
       paramNameList = (_value as any).result.names as string[];
@@ -127,7 +129,7 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
         if(tempList.length > 0) 
           setParamList(tempList);
 
-        setStatus("Parameters retrieved")
+        // setStatus("Parameters retrieved")
         if(paramNameList !== undefined) {
           setSrvParamList(new Array(paramList?.length));
         }
@@ -169,6 +171,7 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
       setStatus("parameters set");
     })
     .catch((error: Error) => {
+      updateData();
       setStatus("Error: " + JSON.stringify(error));
     });
   }

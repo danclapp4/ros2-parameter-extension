@@ -1,3 +1,5 @@
 node_modules/
-test/
-
+dist/
+.eslintric.yaml
+package-lock.json
+*.foxe

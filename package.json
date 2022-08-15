@@ -1,6 +1,6 @@
 {
-  "name": "param_ext",
-  "displayName": "param_ext",
+  "name": "ros2-parameter-extension",
+  "displayName": "ROS2 Parameter Extension",
   "description": "",
   "publisher": "Daniel Clapp",
   "homepage": "",
