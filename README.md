@@ -8,3 +8,19 @@ The **ROS2 Parameters Extension** provides parameter functionality for all your 
 - **Set** new parameter values for all types of parameters on a node
 - **Save** a node's paramter configuration to a .yml file 
 - **Load** a previous configuration from a .yml file stored on your computer
+
+##Installation##
+https://nodejs.org/en/download/
+from the bin folder, run 
+`npm install --global yarn`
+
+from inside your folder, run 
+`yarn install` to get node modules 
+
+run `yarn local-install` to build and add extension to foxglove
+
+-Rosbridge
+
+`sudo apt install ros-galactic-rosbridge-suite`
+`ros2 launch rosbridge_server rosbridge_websocket_launch.xml`
+
