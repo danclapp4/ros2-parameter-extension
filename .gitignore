@@ -1,5 +1,6 @@
 node_modules/
 dist/
-.eslintric.yaml
+.eslintrc.yaml
+.prettierrc.yaml
 package-lock.json
 *.foxe
