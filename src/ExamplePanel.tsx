@@ -4,11 +4,11 @@ import ReactDOM from "react-dom";
 import type {Parameter, ParameterValue, SetSrvParam} from "parameter_types";
 
 
-let node: string = "init";
+let node: string;
 let paramNameList: string[];
 let paramValList: ParameterValue[];
 
-// DEVELOMPENT BRANCH //
+// MAIN BRANCH //
 
 function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Element {
 
@@ -112,7 +112,7 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
    * Retrieves a list of all parameters for the current node and their values
    */
   const updateData = () =>{
-    // setStatus("retrieving parameters...")
+
     context.callService?.(node + "/list_parameters", {})
     .then((_value: unknown) => {
       paramNameList = (_value as any).result.names as string[];
@@ -120,7 +120,6 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
       context.callService?.(node + "/get_parameters", {names: paramNameList})
       .then((_value: unknown) => {
         paramValList = (_value as any).values as ParameterValue[];
-        // console.log(JSON.stringify(paramValList));
 
         let tempList:Array<Parameter> = [];
         for (let i = 0; i < paramNameList.length; i++) {
@@ -129,7 +128,6 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
         if(tempList.length > 0) 
           setParamList(tempList);
 
-        // setStatus("Parameters retrieved")
         if(paramNameList !== undefined) {
           setSrvParamList(new Array(paramList?.length));
         }
@@ -145,15 +143,6 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
    */
   const setParam = () => {
     setStatus("setting parameters...");
-
-    // context.callService?.(node + "/set_parameters", {parameters: [{name: "double_array_param", value: {type: 8, double_array_value: [0.0,0.0,0.0]}}]})
-    // .then(() => {
-    //   setStatus("Success!");
-    //   updateData();
-    // })
-    // .catch((_error: Error) => {
-    //   setStatus(JSON.stringify(_error))
-    // });
 
     let tempList: SetSrvParam[] = srvParamList!;
 
@@ -178,6 +167,7 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
 
 
   let paramTypeList: string[] = ["boolean", "integer", "double", "string", "byte_array", "boolean_array", "integer_array", "double_array", "string_array"];
+
   /**
    * return the parameter type of the given parameter value
    * @param paramVal The given Parameter Value
@@ -203,7 +193,7 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
       const emptyP: SetSrvParam = {};
       tempList[idx] = emptyP;
     } else {
-      let ssp: SetSrvParam = {/*name: name, value: {type: paramList![idx]?.value.type!}*/};
+      let ssp: SetSrvParam = {};
       let valStrArr: string[] = [];
       switch (paramList![idx]?.value.type!) {
         case 1: 
@@ -222,6 +212,7 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
           ssp = { name: name, value: { type: 4, string_value: val }}; 
           break;
  
+        // TODO: Implement format for byte arrays
         case 5: 
           //ssp = { name: name, value: { type: 5, byte_array_value: val as unknown as number[] }}; 
           break;
@@ -306,7 +297,9 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
     return value;
   }
 
-
+  /**
+   * Writes current parameter list to a config file in YAML format
+   */
   const saveParamsToFile = () => {
     let yaml: string = node + ":\n\t" + "ros__parameters:\n\t\t";
       (paramList ?? []).map((result) => (
@@ -340,6 +333,11 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
     );
   }
 
+
+  /**
+   * loads parameter values from a YAML file and sets all new values
+   * @param files the YAML file to be uploaded
+   */
   const loadFile = (files: FileList | null) => { 
     if(files !== null) {
       files[0]?.text()
@@ -370,12 +368,6 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
         console.log(error)
       });
     }
-  }
-
-
-  if(node == "init") {
-    node = "/default_node";
-    updateNodeList();
   }
 
   ///////////////////////////////////////////////////////////////////
@@ -609,7 +601,6 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
               <div style={{margin: "0px 4px 0px 4px"}}>{getParameterValue(result.value)}</div>
               <div style={{margin: "0px 4px 0px 4px"}}> 
                 {createInputBox(result)}
-                {/* <input style={inputStyle} placeholder={getParameterValue(result.value)} onChange={(event) => { updateSrvParamList(param.name, event.target.value) }} /> */}
                 </div>  
             </>
           ))}
@@ -627,38 +618,3 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
 export function initParamsPanel(context: PanelExtensionContext) {
   ReactDOM.render(<ExamplePanel context={context} />, context.panelElement);
 }
-
-
-// export type Parameter = {
-//   name: string;
-//   value: ParameterValue;
-// }
-
-// export type ParameterValue = {
-//   type: number;
-//   bool_value: boolean;
-//   integer_value: number;
-//   double_value: number;
-//   string_value: string;
-//   byte_array_value: number[];
-//   bool_array_value: boolean[];
-//   integer_array_value: number[];
-//   double_array_value: number[];
-//   string_array_value: string[];
-// }
-
-// export type SetSrvParam = { 
-//   name?: string;
-//   value?: {
-//       type: number;
-//       bool_value?: boolean;
-//       integer_value?: number;
-//       double_value?: number;
-//       string_value?: string;
-//       byte_array_value?: number[];
-//       bool_array_value?: boolean[];
-//       integer_array_value?: number[];
-//       double_array_value?: number[];
-//       string_array_value?: string[];
-//   }
-// }
