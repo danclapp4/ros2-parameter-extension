@@ -146,7 +146,7 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
   const setParam = () => {
     setStatus("setting parameters...");
 
-    // context.callService?.(node + "/set_parameters", {parameters: [{name: "double_array_param", value: {type: 8, double_array_value: [0.0,0.0,0.0]}}]})
+    // context.callService?.(node + "/set_parameters", {parameters: [{name: "double_array_param", value: {type: 8, double_array_value: [1.0,2.0,2.0]}}]})
     // .then(() => {
     //   setStatus("Success!");
     //   updateData();
