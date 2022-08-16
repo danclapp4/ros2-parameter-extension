@@ -380,6 +380,7 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
   let setButtonStyle = {};
   let saveButtonStyle = {};
   let loadButtonStyle = {};
+  let textAreaStyle = {};
   let dropDownStyle = {};
   let inputStyle = {};
 
@@ -422,6 +423,17 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
       color: "#333333",
       fontWeight: "500",
 
+    };
+
+    textAreaStyle = {
+      fontSize: "1rem",
+      fontFamily: "helvetica",
+      padding: "3px",
+      backgroundColor: "#f7f7f7",
+      border: "1px solid #333333",
+      borderRadius: "3px",
+      width: "100%",
+      height: "200px"
     };
 
     dropDownStyle = {
@@ -485,6 +497,17 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
       color: "#f7f7f7",
       fontWeight: "500",
 
+    };
+
+    textAreaStyle = {
+      fontSize: "1rem",
+      fontFamily: "helvetica",
+      padding: "3px",
+      backgroundColor: "#4d4d4d",
+      border: "1px solid #4d4d4d",
+      borderRadius: "3px",
+      width: "100%",
+      height: "200px"
     };
 
     dropDownStyle = {
@@ -583,7 +606,7 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
         <label style={labelStyle}>Save to YAML</label>
         <br/>
 
-        <textarea style={{width: "100%", height: "200px"}} value={paramsToYaml}>{}</textarea>
+        <textarea style={textAreaStyle} value={paramsToYaml}></textarea>
         <br/>
 
         <label style={labelStyle}>Parameter List</label>
