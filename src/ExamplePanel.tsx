@@ -3,7 +3,7 @@ import { useLayoutEffect, useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 import type {Parameter, ParameterValue, SetSrvParam} from "parameter_types";
 
-// MAIN BRANCH //
+// BRANCH: MAIN //
 
 let node: string;
 let paramNameList: string[];
