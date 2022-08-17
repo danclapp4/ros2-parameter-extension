@@ -572,16 +572,30 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
     padding: "5px",
     borderTop: "0.5px solid",
   }
+
+  const footerStyle = {
+    backgroundColor: "#F8F8F8",
+    borderTop: "1px solid #E7E7E7",
+    textAlign: "center",
+    padding: "20px",
+    position: "fixed",
+    left: "0",
+    bottom: "0",
+    height: "60px",
+    width: "100%"
+  };
+  footerStyle;
   
   ///////////////////////////////////////////////////////////////////
 
   ///////////////////////// HTML PANEL //////////////////////////////
 
   return (
+    <body>
     <div style={{ padding: "1rem", 
                   scrollBehavior: "smooth", 
-                  maxHeight:"100%", 
-                  overflowY: "scroll", 
+                  maxHeight:"calc(100% - 25px)", 
+                  overflowY: "scroll",
                   fontFamily: "helvetica", 
                   fontSize: "1rem",
                   }}>
@@ -654,9 +668,11 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
           ))}
         </div>
       </form>
-      <p style={statusStyle}>status: {status}</p>
-
     </div>
+    <div style={{left: "0px", bottom: "0px", height: "25px", width: "100%", position: "sticky"}}>
+      <p style={statusStyle}>status: {status}</p>
+    </div>
+    </body>
   );
 
   ///////////////////////////////////////////////////////////////////
