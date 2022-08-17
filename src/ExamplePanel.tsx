@@ -8,7 +8,7 @@ let node: string = "init";
 let paramNameList: string[];
 let paramValList: ParameterValue[];
 
-// DEVELOMPENT BRANCH --- save-and-load //
+// DEVELOMPENT BRANCH: SAVE-AND-LOAD //
 
 function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Element {
 
