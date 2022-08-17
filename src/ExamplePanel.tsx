@@ -3,12 +3,12 @@ import { useLayoutEffect, useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 import type {Parameter, ParameterValue, SetSrvParam} from "parameter_types";
 
+// DEVELOMPENT BRANCH: SAVE-AND-LOAD //
 
 let node: string = "init";
 let paramNameList: string[];
 let paramValList: ParameterValue[];
 
-// DEVELOMPENT BRANCH: SAVE-AND-LOAD //
 
 function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Element {
 
@@ -20,7 +20,7 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
   const [nodeList, setNodeList] = useState<string[]>();
   const [colorScheme, setColorScheme] = useState<string>();
   const [bgColor, setBgColor] = useState("#d6d6d6");
-  const [saveBgColor, setSaveBgColor] = useState("#d6d6d6");
+  const [saveBgColor, setSaveBgColor] = useState("#d6d6d6q");
   const [loadBgColor, setLoadBgColor] = useState("#d6d6d6");
   const [paramsToYaml, setParamsToYaml] = useState<string>();
 
