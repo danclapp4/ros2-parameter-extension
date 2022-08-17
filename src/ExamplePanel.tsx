@@ -3,25 +3,29 @@ import { useLayoutEffect, useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 import type {Parameter, ParameterValue, SetSrvParam} from "parameter_types";
 
+// MAIN BRANCH //
 
 let node: string;
 let paramNameList: string[];
 let paramValList: ParameterValue[];
 
-// MAIN BRANCH //
 
 function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Element {
 
 
   const [renderDone, setRenderDone] = useState<(() => void) | undefined>();
+
   const [status, setStatus] = useState<string | undefined>();
+
   const [paramList, setParamList] = useState<Array<Parameter>>();
   const [srvParamList, setSrvParamList] = useState<Array<SetSrvParam>>();
   const [nodeList, setNodeList] = useState<string[]>();
+
   const [colorScheme, setColorScheme] = useState<string>();
   const [bgColor, setBgColor] = useState("#d6d6d6");
-  const [saveBgColor, setSaveBgColor] = useState("#d6d6d6");
-  const [loadBgColor, setLoadBgColor] = useState("#d6d6d6");
+  const [saveButtonBgColor, setSaveButtonBgColor] = useState("#d6d6d6");
+  const [loadButtonBgColor, setLoadButtonBgColor] = useState("#d6d6d6");
+
   const [paramsToYaml, setParamsToYaml] = useState<string>();
 
   useLayoutEffect( () => {
@@ -30,19 +34,24 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
 
       setRenderDone(() => done); 
       updateNodeList();
+
+      //Manage some styling for light and dark theme
       setColorScheme(renderState.colorScheme);
       if(renderState.colorScheme == "light") {
         setBgColor("#d6d6d6");
-        setSaveBgColor("#d6d6d6");
-        setLoadBgColor("#d6d6d6");
+        setSaveButtonBgColor("#d6d6d6");
+        setLoadButtonBgColor("#d6d6d6");
       } else if (renderState.colorScheme == "dark") {
         setBgColor("#4d4d4d");
-        setSaveBgColor("#4d4d4d");
-        setLoadBgColor("#4d4d4d");
+        setSaveButtonBgColor("#4d4d4d");
+        setLoadButtonBgColor("#4d4d4d");
       }
     };
 
+    //If new topics are found, context.onRender() will update the list of nodes
     context.watch("topics");
+
+    //If colorScheme changes, context.onRender() will change styling to match new color scheme
     context.watch("colorScheme");
 
   }, []);
@@ -52,7 +61,11 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
     renderDone?.();
   }, [renderDone]);
 
-
+  /**
+   * converts string representation of a boolean to a boolean
+   * @param stringValue "true" or "false"
+   * @returns true or false
+   */
   const stringToBoolean = (stringValue: string) => {
     switch(stringValue?.toLowerCase()?.trim()){
         case "true": return true;
@@ -61,7 +74,11 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
     }
   }
 
-
+  /**
+   * determines if a string[] contains exlusively booleans
+   * @param strArr string[] to check  
+   * @returns true if strArr only contains booleans, false otherwise
+   */
   const isBooleanArr = (strArr: string[]) => {
     let bool: boolean = true;
     strArr.forEach(element => {
@@ -111,7 +128,7 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
   /**
    * Retrieves a list of all parameters for the current node and their values
    */
-  const updateData = () =>{
+  const updateParamList = () =>{
 
     context.callService?.(node + "/list_parameters", {})
     .then((_value: unknown) => {
@@ -139,7 +156,7 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
 
   /**
    * Sets new values to all parameters with an inputted new value
-   * Calls updateData() to 'refresh' the screen and display the new parameter values
+   * Calls updateParamList() to 'refresh' the screen and display the new parameter values
    */
   const setParam = () => {
     setStatus("setting parameters...");
@@ -156,11 +173,11 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
     setSrvParamList(tempList);
     context.callService?.(node + "/set_parameters", {parameters: srvParamList})
     .then(() => {
-      updateData();
+      updateParamList();
       setStatus("parameters set");
     })
     .catch((error: Error) => {
-      updateData();
+      updateParamList();
       setStatus("Error: " + JSON.stringify(error));
     });
   }
@@ -258,7 +275,11 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
     });
   }
 
-
+  /**
+   * Gives the YAML format of a parameter and its value
+   * @param pVal Parameter value in question
+   * @returns pVal in YAML format
+   */
   const getYamlValue = (pVal: ParameterValue) => {
     let value: string = "";
     switch (pVal.type!) {
@@ -348,15 +369,19 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
 
         let params: string[] = value.split("\n");
         for(let i = 0; i < params.length; i++) {
+
           if(params[i]!.charAt(0) != '-' && params[i]!.charAt(params[i]!.length - 1) != ':') {
             let temp: string[]= params[i]!.split(":");
             updateSrvParamList(temp[0]!, temp[1]!);
+
           } else if(params[i]!.charAt(params[i]!.length - 1) == ':') {
             let tempName: string = params[i]!.replace(":", "").trim();
             let tempVal: string = "";
+
             while(i + 1 < params.length && params[++i]!.charAt(0) == '-') {
               tempVal = tempVal.concat(params[i]!.replace("-", "").trim() + ",");
             }
+
             i--;
             tempVal = tempVal.substring(0, tempVal.length-1);
             updateSrvParamList(tempName, tempVal);
@@ -402,8 +427,8 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
     saveButtonStyle = {
 
       fontSize: "1rem",
-      backgroundColor: saveBgColor,
-      border: saveBgColor + " solid",
+      backgroundColor: saveButtonBgColor,
+      border: saveButtonBgColor + " solid",
       margin: "36px 12px 36px 12px",
       padding: "8px",
       borderRadius: "4px",
@@ -415,8 +440,8 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
     loadButtonStyle = {
 
       fontSize: "1rem",
-      backgroundColor: loadBgColor,
-      border: loadBgColor + " solid",
+      backgroundColor: loadButtonBgColor,
+      border: loadButtonBgColor + " solid",
       margin: "36px 0px 36px 12px",
       padding: "8px",
       borderRadius: "4px",
@@ -476,8 +501,8 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
     saveButtonStyle = {
 
       fontSize: "1rem",
-      backgroundColor: saveBgColor,
-      border: saveBgColor + " solid",
+      backgroundColor: saveButtonBgColor,
+      border: saveButtonBgColor + " solid",
       margin: "36px 12px 36px 12px",
       padding: "8px",
       borderRadius: "4px",
@@ -489,8 +514,8 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
     loadButtonStyle = {
 
       fontSize: "1rem",
-      backgroundColor: loadBgColor,
-      border: loadBgColor + " solid",
+      backgroundColor: loadButtonBgColor,
+      border: loadButtonBgColor + " solid",
       margin: "36px 0px 36px 12px",
       padding: "8px",
       borderRadius: "4px",
@@ -564,7 +589,7 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
       <label style={labelStyle}>Node:</label>
       <select
         value={node}
-        onChange={(event) => { node = event.target.value; updateData(); }}
+        onChange={(event) => { node = event.target.value; updateParamList(); }}
         style={dropDownStyle}
         >
         <option selected hidden>Select a Node</option>
@@ -586,8 +611,8 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
         <button 
           style={saveButtonStyle } 
           id="save"
-          onMouseEnter={() => setSaveBgColor("#8f8f8f")} 
-          onMouseLeave={() => colorScheme == "dark" ? setSaveBgColor("#4d4d4d"): setSaveBgColor("#d6d6d6")} 
+          onMouseEnter={() => setSaveButtonBgColor("#8f8f8f")} 
+          onMouseLeave={() => colorScheme == "dark" ? setSaveButtonBgColor("#4d4d4d"): setSaveButtonBgColor("#d6d6d6")} 
           onClick={saveParamsToFile}
           type="button">
             Save
@@ -595,8 +620,8 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
 
         <label 
           style={loadButtonStyle} 
-          onMouseEnter={() => setLoadBgColor("#8f8f8f")} 
-          onMouseLeave={() => colorScheme == "dark" ? setLoadBgColor("#4d4d4d"): setLoadBgColor("#d6d6d6")} 
+          onMouseEnter={() => setLoadButtonBgColor("#8f8f8f")} 
+          onMouseLeave={() => colorScheme == "dark" ? setLoadButtonBgColor("#4d4d4d"): setLoadButtonBgColor("#d6d6d6")} 
           >
           <input type="file" style={{display: "none"}} onChange={(event) => {loadFile(event.target.files)}}/>
             Load
