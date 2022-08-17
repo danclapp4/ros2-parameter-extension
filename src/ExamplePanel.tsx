@@ -3,9 +3,10 @@ import { useLayoutEffect, useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 import type {Parameter, ParameterValue, SetSrvParam} from "parameter_types";
 
-// BRANCH: MAIN //
+// DEV BRANCH: CALL-SERVICE-TESTING //
 
 let node: string;
+let service: string;
 let paramNameList: string[];
 let paramValList: ParameterValue[];
 
@@ -20,13 +21,11 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
   const [paramList, setParamList] = useState<Array<Parameter>>();
   const [srvParamList, setSrvParamList] = useState<Array<SetSrvParam>>();
   const [nodeList, setNodeList] = useState<string[]>();
+  const [srvList, setSrvList] = useState<string[]>();
 
   const [colorScheme, setColorScheme] = useState<string>();
   const [bgColor, setBgColor] = useState("#d6d6d6");
   const [saveButtonBgColor, setSaveButtonBgColor] = useState("#d6d6d6");
-  const [loadButtonBgColor, setLoadButtonBgColor] = useState("#d6d6d6");
-
-  const [paramsToYaml, setParamsToYaml] = useState<string>();
 
   useLayoutEffect( () => {
 
@@ -34,17 +33,16 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
 
       setRenderDone(() => done); 
       updateNodeList();
+      updateServiceList();
 
       //Manage some styling for light and dark theme
       setColorScheme(renderState.colorScheme);
       if(renderState.colorScheme == "light") {
         setBgColor("#d6d6d6");
         setSaveButtonBgColor("#d6d6d6");
-        setLoadButtonBgColor("#d6d6d6");
       } else if (renderState.colorScheme == "dark") {
         setBgColor("#4d4d4d");
         setSaveButtonBgColor("#4d4d4d");
-        setLoadButtonBgColor("#4d4d4d");
       }
     };
 
@@ -124,6 +122,17 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
     })
     .catch((_error: Error) => { setStatus(_error.toString()); });
   }
+
+  const updateServiceList = () => {
+    setStatus("retreiving services...")
+    context.callService?.("/rosapi/services", {})
+    .then((_values: unknown) =>{ 
+      setSrvList((_values as any).services as string[]);
+      setStatus("nodes services");  
+    })
+    .catch((_error: Error) => { setStatus(_error.toString()); });
+  }
+  
   
   /**
    * Retrieves a list of all parameters for the current node and their values
@@ -275,61 +284,15 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
     });
   }
 
-  /**
-   * Gives the YAML format of a parameter and its value
-   * @param pVal Parameter value in question
-   * @returns pVal in YAML format
-   */
-  const getYamlValue = (pVal: ParameterValue) => {
-    let value: string = "";
-    switch (pVal.type!) {
-      case 1: value = pVal.bool_value.toString(); break;
-      case 2: value = pVal.integer_value.toString(); break;
-      case 3: value = pVal.double_value.toString(); break;
-      case 4: value = pVal.string_value; break;
-      case 5:
-
-        pVal.byte_array_value.forEach(val => {
-          value = value.concat("\n\t\t- " + val.toString());
-        });
-        break;
-      case 6: 
-        pVal.bool_array_value.forEach(val => {
-          value = value.concat("\n\t\t- " + val.toString());
-        });
-        break;
-      case 7:
-        pVal.integer_array_value.forEach(val => {
-          value = value.concat("\n\t\t- " + val.toString());
-        });
-        break;
-      case 8: 
-        pVal.double_array_value.forEach(val => {
-          value = value.concat("\n\t\t- " + val.toString());
-        });
-        break;
-      case 9: 
-        pVal.string_array_value.forEach(val => {
-          value = value.concat("\n\t\t- " + val);
-        });
-        break;
-      default:
-    }
-    return value;
+  const callService = () => {
+    context.callService?.(service, {})
+    .then((result) => {
+      setStatus(JSON.stringify(result));
+    })
+    .catch((error: Error) => {
+      setStatus(JSON.stringify(error));
+    })
   }
-
-  /**
-   * Writes current parameter list to a config file in YAML format
-   */
-  const saveParamsToFile = () => {
-    let yaml: string = node + ":\n\t" + "ros__parameters:\n\t\t";
-      (paramList ?? []).map((result) => (
-        yaml = yaml.concat(result.name + ": " + getYamlValue(result.value) + "\n\t\t")
-      ))
-    setParamsToYaml(yaml);
-
-  }
-
   
   /**
    * Creates a dropdown input box if param is a boolean, creates a text input box otherwise
@@ -354,47 +317,6 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
     );
   }
 
-
-  /**
-   * loads parameter values from a YAML file and sets all new values
-   * @param files the YAML file to be uploaded
-   */
-  const loadFile = (files: FileList | null) => { 
-    if(files !== null) {
-      files[0]?.text()
-      .then((value: string) => {      
-        value = value.replaceAll(/[^\S\r\n]/gi, "");
-        value = value.replace(node + ":\n", "");
-        value = value.replace("ros__parameters:\n", "");
-
-        let params: string[] = value.split("\n");
-        for(let i = 0; i < params.length; i++) {
-
-          if(params[i]!.charAt(0) != '-' && params[i]!.charAt(params[i]!.length - 1) != ':') {
-            let temp: string[]= params[i]!.split(":");
-            updateSrvParamList(temp[0]!, temp[1]!);
-
-          } else if(params[i]!.charAt(params[i]!.length - 1) == ':') {
-            let tempName: string = params[i]!.replace(":", "").trim();
-            let tempVal: string = "";
-
-            while(i + 1 < params.length && params[++i]!.charAt(0) == '-') {
-              tempVal = tempVal.concat(params[i]!.replace("-", "").trim() + ",");
-            }
-
-            i--;
-            tempVal = tempVal.substring(0, tempVal.length-1);
-            updateSrvParamList(tempName, tempVal);
-          }
-        }
-        setParam();
-      })
-      .catch((error: Error) => {
-        console.log(error)
-      });
-    }
-  }
-
   ///////////////////////////////////////////////////////////////////
   //////////////////////// PANEL LAYOUT /////////////////////////////
   ///////////////////////////////////////////////////////////////////
@@ -404,8 +326,6 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
 
   let setButtonStyle = {};
   let saveButtonStyle = {};
-  let loadButtonStyle = {};
-  let textAreaStyle = {};
   let dropDownStyle = {};
   let inputStyle = {};
 
@@ -435,30 +355,6 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
       color: "#333333",
       fontWeight: "500",
 
-    };
-
-    loadButtonStyle = {
-
-      fontSize: "1rem",
-      backgroundColor: loadButtonBgColor,
-      border: loadButtonBgColor + " solid",
-      margin: "36px 0px 36px 12px",
-      padding: "8px",
-      borderRadius: "4px",
-      color: "#333333",
-      fontWeight: "500",
-
-    };
-
-    textAreaStyle = {
-      fontSize: "1rem",
-      fontFamily: "helvetica",
-      padding: "3px",
-      backgroundColor: "#f7f7f7",
-      border: "1px solid #333333",
-      borderRadius: "3px",
-      width: "100%",
-      height: "200px"
     };
 
     dropDownStyle = {
@@ -509,30 +405,6 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
       color: "#f7f7f7",
       fontWeight: "500",
 
-    };
-
-    loadButtonStyle = {
-
-      fontSize: "1rem",
-      backgroundColor: loadButtonBgColor,
-      border: loadButtonBgColor + " solid",
-      margin: "36px 0px 36px 12px",
-      padding: "8px",
-      borderRadius: "4px",
-      color: "#f7f7f7",
-      fontWeight: "500",
-
-    };
-
-    textAreaStyle = {
-      fontSize: "1rem",
-      fontFamily: "helvetica",
-      padding: "3px",
-      backgroundColor: "#4d4d4d",
-      border: "1px solid #4d4d4d",
-      borderRadius: "3px",
-      width: "100%",
-      height: "200px"
     };
 
     dropDownStyle = {
@@ -612,6 +484,18 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
         ))}
       </select>
 
+      <label style={labelStyle}> Service:</label>
+      <select
+        value={service}
+        onChange={(event) => { service = event.target.value;}}
+        style={dropDownStyle}
+        >
+        <option selected hidden>Select a Service</option>
+        {(srvList ?? []).map((srv) => (
+          <option key={srv} value={srv}>{srv}</option>
+        ))}
+      </select>
+
       <form>
         <button 
           style={setButtonStyle} 
@@ -627,25 +511,10 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
           id="save"
           onMouseEnter={() => setSaveButtonBgColor("#8f8f8f")} 
           onMouseLeave={() => colorScheme == "dark" ? setSaveButtonBgColor("#4d4d4d"): setSaveButtonBgColor("#d6d6d6")} 
-          onClick={saveParamsToFile}
+          onClick={callService}
           type="button">
-            Save
+            Call Service
         </button>
-
-        <label 
-          style={loadButtonStyle} 
-          onMouseEnter={() => setLoadButtonBgColor("#8f8f8f")} 
-          onMouseLeave={() => colorScheme == "dark" ? setLoadButtonBgColor("#4d4d4d"): setLoadButtonBgColor("#d6d6d6")} 
-          >
-          <input type="file" style={{display: "none"}} onChange={(event) => {loadFile(event.target.files)}}/>
-            Load
-        </label>
-        <br/>
-
-        <label style={labelStyle}>Save to YAML</label>
-        <br/>
-
-        <textarea style={textAreaStyle} value={paramsToYaml}></textarea>
         <br/>
 
         <label style={labelStyle}>Parameter List</label>
