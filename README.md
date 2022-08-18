@@ -6,15 +6,14 @@ The **ROS2 Parameters Extension** provides parameter functionality for all your 
 
 - **View** a node's parameter names, types, and values in a table format
 - **Set** new parameter values for all types of parameters on a node
-- **Save** a node's paramter configuration to a .yml file 
-- **Load** a previous configuration from a .yml file stored on your computer
+- **Call Service** from a dropdown of available services (currently no support for adding arguments)
 
 ## Installation
 
 - Download NodeJs 14+ [here](https://nodejs.org/en/download/)
 - from the bin folder, run:
 ```
-npm install --global yarn
+npm install --global node-js
 ```
 
 - from inside your folder where you cloned this repo, run: 
