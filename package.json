@@ -1,11 +1,11 @@
 {
   "name": "ros2-parameter-extension",
-  "displayName": "ROS2 Parameter Extension",
-  "description": "",
+  "displayName": "ROS2 Parameters",
+  "description": "Interact with Parameters in ROS2",
   "publisher": "Daniel Clapp",
-  "homepage": "",
+  "homepage": "https://github.com/danclapp4/ros2-parameter-extension",
   "version": "0.0.1",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "main": "./dist/extension.js",
   "keywords": [],
   "scripts": {
