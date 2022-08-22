@@ -3,7 +3,7 @@ import { useLayoutEffect, useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 import type {Parameter, ParameterValue, SetSrvParam} from "parameter_types";
 
-// BRANCH: MAIN //
+// v1.0.0 //
 
 let node: string;
 let paramNameList: string[];
@@ -23,10 +23,8 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
 
   const [colorScheme, setColorScheme] = useState<string>();
   const [bgColor, setBgColor] = useState("#d6d6d6");
-  const [saveButtonBgColor, setSaveButtonBgColor] = useState("#d6d6d6");
   const [loadButtonBgColor, setLoadButtonBgColor] = useState("#d6d6d6");
 
-  const [paramsToYaml, setParamsToYaml] = useState<string>();
 
   useLayoutEffect( () => {
 
@@ -39,11 +37,9 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
       setColorScheme(renderState.colorScheme);
       if(renderState.colorScheme == "light") {
         setBgColor("#d6d6d6");
-        setSaveButtonBgColor("#d6d6d6");
         setLoadButtonBgColor("#d6d6d6");
       } else if (renderState.colorScheme == "dark") {
         setBgColor("#4d4d4d");
-        setSaveButtonBgColor("#4d4d4d");
         setLoadButtonBgColor("#4d4d4d");
       }
     };
@@ -274,62 +270,6 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
       tempValList.push(getParameterValue(element));
     });
   }
-
-  /**
-   * Gives the YAML format of a parameter and its value
-   * @param pVal Parameter value in question
-   * @returns pVal in YAML format
-   */
-  const getYamlValue = (pVal: ParameterValue) => {
-    let value: string = "";
-    switch (pVal.type!) {
-      case 1: value = pVal.bool_value.toString(); break;
-      case 2: value = pVal.integer_value.toString(); break;
-      case 3: value = pVal.double_value.toString(); break;
-      case 4: value = pVal.string_value; break;
-      case 5:
-
-        pVal.byte_array_value.forEach(val => {
-          value = value.concat("\n\t\t- " + val.toString());
-        });
-        break;
-      case 6: 
-        pVal.bool_array_value.forEach(val => {
-          value = value.concat("\n\t\t- " + val.toString());
-        });
-        break;
-      case 7:
-        pVal.integer_array_value.forEach(val => {
-          value = value.concat("\n\t\t- " + val.toString());
-        });
-        break;
-      case 8: 
-        pVal.double_array_value.forEach(val => {
-          value = value.concat("\n\t\t- " + val.toString());
-        });
-        break;
-      case 9: 
-        pVal.string_array_value.forEach(val => {
-          value = value.concat("\n\t\t- " + val);
-        });
-        break;
-      default:
-    }
-    return value;
-  }
-
-  /**
-   * Writes current parameter list to a config file in YAML format
-   */
-  const saveParamsToFile = () => {
-    let yaml: string = node + ":\n\t" + "ros__parameters:\n\t\t";
-      (paramList ?? []).map((result) => (
-        yaml = yaml.concat(result.name + ": " + getYamlValue(result.value) + "\n\t\t")
-      ))
-    setParamsToYaml(yaml);
-
-  }
-
   
   /**
    * Creates a dropdown input box if param is a boolean, creates a text input box otherwise
@@ -403,9 +343,7 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
   //////////////////////// CSS STYLING //////////////////////////////
 
   let setButtonStyle = {};
-  let saveButtonStyle = {};
   let loadButtonStyle = {};
-  let textAreaStyle = {};
   let dropDownStyle = {};
   let inputStyle = {};
 
@@ -424,19 +362,6 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
 
     };
 
-    saveButtonStyle = {
-
-      fontSize: "1rem",
-      backgroundColor: saveButtonBgColor,
-      border: saveButtonBgColor + " solid",
-      margin: "36px 12px 36px 12px",
-      padding: "8px",
-      borderRadius: "4px",
-      color: "#333333",
-      fontWeight: "500",
-
-    };
-
     loadButtonStyle = {
 
       fontSize: "1rem",
@@ -448,17 +373,6 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
       color: "#333333",
       fontWeight: "500",
 
-    };
-
-    textAreaStyle = {
-      fontSize: "1rem",
-      fontFamily: "helvetica",
-      padding: "3px",
-      backgroundColor: "#f7f7f7",
-      border: "1px solid #333333",
-      borderRadius: "3px",
-      width: "100%",
-      height: "200px"
     };
 
     dropDownStyle = {
@@ -498,19 +412,6 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
 
     };
 
-    saveButtonStyle = {
-
-      fontSize: "1rem",
-      backgroundColor: saveButtonBgColor,
-      border: saveButtonBgColor + " solid",
-      margin: "36px 12px 36px 12px",
-      padding: "8px",
-      borderRadius: "4px",
-      color: "#f7f7f7",
-      fontWeight: "500",
-
-    };
-
     loadButtonStyle = {
 
       fontSize: "1rem",
@@ -522,17 +423,6 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
       color: "#f7f7f7",
       fontWeight: "500",
 
-    };
-
-    textAreaStyle = {
-      fontSize: "1rem",
-      fontFamily: "helvetica",
-      padding: "3px",
-      backgroundColor: "#4d4d4d",
-      border: "1px solid #4d4d4d",
-      borderRadius: "3px",
-      width: "100%",
-      height: "200px"
     };
 
     dropDownStyle = {
@@ -622,16 +512,6 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
             Set Parameters
         </button>
 
-        <button 
-          style={saveButtonStyle } 
-          id="save"
-          onMouseEnter={() => setSaveButtonBgColor("#8f8f8f")} 
-          onMouseLeave={() => colorScheme == "dark" ? setSaveButtonBgColor("#4d4d4d"): setSaveButtonBgColor("#d6d6d6")} 
-          onClick={saveParamsToFile}
-          type="button">
-            Save
-        </button>
-
         <label 
           style={loadButtonStyle} 
           onMouseEnter={() => setLoadButtonBgColor("#8f8f8f")} 
@@ -643,9 +523,6 @@ function ExamplePanel({ context }: { context: PanelExtensionContext }): JSX.Elem
         <br/>
 
         <label style={labelStyle}>Save to YAML</label>
-        <br/>
-
-        <textarea style={textAreaStyle} value={paramsToYaml}></textarea>
         <br/>
 
         <label style={labelStyle}>Parameter List</label>
