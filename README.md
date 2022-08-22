@@ -2,8 +2,6 @@
 
 ## _A Foxglove Studio Extension_
 
-**Version 1.0.0**
-
 The **ROS2 Parameters Extension** provides parameter functionality for all your ROS2 nodes including: 
 
 - **View** a node's parameter names, types, and values in a table format
